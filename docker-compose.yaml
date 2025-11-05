@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgresql:
+    image: bitnami/postgresql:latest
+    container_name: postgresql
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volumes/postgresql/data:/var/lib/postgresql/data
+
+networks:
+  default:
+    name: pcd-net

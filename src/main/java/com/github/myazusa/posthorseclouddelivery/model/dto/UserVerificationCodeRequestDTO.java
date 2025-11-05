@@ -1,5 +1,4 @@
-package com.github.myazusa.posthorseclouddelivery.model.dto;
-
+﻿package com.github.myazusa.posthorseclouddelivery.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,13 +6,11 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class UserAuthRequestDTO {
-    @NotNull
+public class UserVerificationCodeRequestDTO {
     @NotBlank
+    @NotNull
     @Pattern(regexp = "^\\+?[0-9]{6,20}$", message = "手机号格式错误")
-    private String username;
+    String username;
 
-    @NotNull
-    @NotBlank
-    private String password;
+    String code;
 }

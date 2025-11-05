@@ -24,7 +24,7 @@ public class ProtectedController {
     }
 
     @PostMapping("/reset_password")
-    public ResponseEntity<InformationResponseDTO> resetPassword(HttpServletRequest servletRequest, @RequestBody UserAuthRequestDTO userAuthRequestDTO){
+    public ResponseEntity<?> resetPassword(HttpServletRequest servletRequest, @RequestBody UserAuthRequestDTO userAuthRequestDTO){
         String header = servletRequest.getHeader("Authorization");
         jwtAuthCompoService.resetPassword(header,userAuthRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("变更成功"));
