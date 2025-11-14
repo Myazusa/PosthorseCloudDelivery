@@ -3,6 +3,10 @@ server:
 spring:
   application:
     name: PosthorseCloudDelivery
+  sql:
+    init:
+      schema-locations: classpath:init.sql
+      mode: always
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -12,3 +16,10 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
+
+app:
+  resource:
+    location:
+      upload:
+        origin: file:./upload/
+        mapping: /upload/**

@@ -11,7 +11,7 @@ public class UserAuthRequestDTO {
     @NotNull
     @NotBlank
     @Pattern(regexp = "^\\+?[0-9]{6,20}$", message = "手机号格式错误")
-    private String username;
+    private String phone;
 
     @NotNull
     @NotBlank

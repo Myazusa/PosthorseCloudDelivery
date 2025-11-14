@@ -8,19 +8,21 @@ import io.jsonwebtoken.security.Keys;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 public class JwtUtils {
     private static final byte[] secretKey = "sawnvklkanlvkyuiysfodsfokklcanoicwejciojweoijakdhfdoswe".getBytes();
 
     // 生成token
-    public static String generateToken(String username) {
+    public static String generateToken(String phone, UUID uuid) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("uuid", uuid);
         // todo：设置成spring配置
         long expirationTime = 1000L * 60 * 60 * 24 * 10;
         return Jwts.builder()
                 .claims(claims)
-                .subject(username)
+                .subject(phone)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(Keys.hmacShaKeyFor(secretKey))
@@ -42,9 +44,14 @@ public class JwtUtils {
                 .build().parseSignedClaims(s).getPayload();
     }
 
-    // 获取token的用户信息
-    public static String extractUsername(String header) {
+    // 获取token的手机信息
+    public static String extractPhone(String header) {
         return parseToken(header).getSubject();
+    }
+
+    // 获取token的uuid信息
+    public static UUID extractUUID(String header){
+        return getClaims(header).get("uuid", UUID.class);
     }
 
     // 校验token日期

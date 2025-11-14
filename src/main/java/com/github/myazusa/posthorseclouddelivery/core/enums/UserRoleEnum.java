@@ -5,7 +5,7 @@ public enum UserRoleEnum {
     manageUsers("manageUsers"); // 拥有该权限用户可以修改其他用户
 
     private final String role;
-    public String getUserPermissionString(){
+    public String getUserRoleString(){
         return role;
     }
 
@@ -14,7 +14,7 @@ public enum UserRoleEnum {
     }
     public static UserRoleEnum fromString(String value) {
         for (UserRoleEnum role : UserRoleEnum.values()) {
-            if (role.getUserPermissionString().equalsIgnoreCase(value)) {
+            if (role.getUserRoleString().equalsIgnoreCase(value)) {
                 return role;
             }
         }

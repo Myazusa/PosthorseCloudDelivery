@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper
 public interface UserAuthMapper extends BaseMapper<UserDAO> {
     @Select("""
-        SELECT r.name FROM role r JOIN user_role ur ON r.id = ur.role_id WHERE ur.user_id = #{userId}
+        SELECT r.name FROM role r JOIN user_role ur ON r.id = ur.role_id WHERE ur.user_id = #{phone}
     """)
-    List<String> getRolesByUsername(Integer userId);
+    List<String> getRolesByPhone(String phone);
 }

@@ -10,7 +10,7 @@ public class UserRegisterRequestDTO {
     @NotBlank
     @NotNull
     @Pattern(regexp = "^\\+?[0-9]{6,20}$", message = "手机号格式错误")
-    String username;
+    String phone;
 
     @NotBlank
     @NotNull

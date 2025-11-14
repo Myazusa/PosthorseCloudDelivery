@@ -33,11 +33,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header==null || JwtUtils.isTokenExpired(header)){
             return;
         }
-        // 如果没有过期，解析token获取用户名
-        var username = JwtUtils.extractUsername(header);
-        if (username != null) {
+        // 如果没有过期，解析token获取手机号
+        var phone = JwtUtils.extractPhone(header);
+        if (phone != null) {
             // 设置认证状态为true
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null, null);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(phone, null, null);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             // 保存凭证到上下文以便使用
             SecurityContextHolder.getContext().setAuthentication(authentication);
