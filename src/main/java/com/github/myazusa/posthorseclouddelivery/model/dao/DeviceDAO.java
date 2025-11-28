@@ -15,13 +15,10 @@ import java.util.UUID;
 public class DeviceDAO {
     private UUID uuid;
 
-    // todo: 补全其他字段
     private LocalDateTime lastOnline;
 
     private double latitude;
     private double longitude;
-
-    private PGgeometry location;
 
     // 以下字段插入时数据库自动填充，可以不赋值
     @TableField(insertStrategy = FieldStrategy.NOT_NULL)

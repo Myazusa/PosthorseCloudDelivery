@@ -38,7 +38,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("注册成功"));
     }
 
-    @PostMapping("/send_code")
+    @PostMapping("/send-code")
     public ResponseEntity<?> sendCode(@RequestBody UserVerificationCodeRequestDTO userVerificationCodeRequestDTO) {
         String phone = userVerificationCodeRequestDTO.getUsername();
 
@@ -59,7 +59,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("成功发送验证码"));
     }
 
-    @PostMapping("/verify_code")
+    @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody UserVerificationCodeRequestDTO userVerificationCodeRequestDTO) {
         if (userVerificationCodeRequestDTO.getCode() == null || userVerificationCodeRequestDTO.getCode().isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage("未填写验证码"));

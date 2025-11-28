@@ -74,8 +74,8 @@
         </dependency>
         <dependency>
             <groupId>com.github.yulichang</groupId>
-            <artifactId>mybatis-plus-join</artifactId>
-            <version>1.4.13</version>
+            <artifactId>mybatis-plus-join-boot-starter</artifactId>
+            <version>1.5.4</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>

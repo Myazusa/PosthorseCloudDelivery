@@ -69,7 +69,7 @@ public class UserRepositoryCompoService {
         FileTypeEnum fileTypeEnum;
         FileSortByEnum fileSortByEnum;
         SortOrderEnum sortOrderEnum;
-        // 校验参数是否可信
+        // 文件类型和排序参数校验
         try {
             fileTypeEnum = FileTypeEnum.fromString(listFilesRequestDTO.getFileType());
         }catch (IllegalArgumentException e){
@@ -84,6 +84,17 @@ public class UserRepositoryCompoService {
             sortOrderEnum = SortOrderEnum.fromString(listFilesRequestDTO.getSortOrder());
         }catch (IllegalArgumentException e){
             throw new InvalidParamException("传入的sortOrder参数不正确，不允许上传asc和desc之外的类型");
+        }
+
+        // 分页参数正确性校验
+        if (listFilesRequestDTO.getPageNumber() == null || listFilesRequestDTO.getPageSize() == null){
+            throw new InvalidParamException("分页查询的分页参数不可为空");
+        }
+        if (listFilesRequestDTO.getPageNumber() < 1) {
+            throw new InvalidParamException("分页查询页码不允许小于1");
+        }
+        if (listFilesRequestDTO.getPageSize() < 1 || listFilesRequestDTO.getPageSize() > 100) {
+            throw new InvalidParamException("分页查询每页大小不允许小于1或大于100");
         }
 
         // 拆包传入
@@ -110,5 +121,9 @@ public class UserRepositoryCompoService {
         });
 
         return filesResponseDTOList;
+    }
+
+    public void deleteFiles(Authentication authentication, ListFilesRequestDTO listFilesRequestDTO){
+        var user = (UserDetailsDTO)authentication.getPrincipal();
     }
 }

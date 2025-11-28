@@ -1,5 +1,7 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service.micro;
 
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.github.myazusa.posthorseclouddelivery.core.enums.FileSortByEnum;
 import com.github.myazusa.posthorseclouddelivery.core.enums.FileTypeEnum;
@@ -9,6 +11,7 @@ import com.github.myazusa.posthorseclouddelivery.mapper.AdMapper;
 import com.github.myazusa.posthorseclouddelivery.mapper.UserAdMapper;
 import com.github.myazusa.posthorseclouddelivery.model.dao.AdDAO;
 import com.github.myazusa.posthorseclouddelivery.model.dao.UserAdDAO;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -91,6 +95,7 @@ public class UserRepositoryService {
 
             try {
                 var timeOrderedEpoch = UuidCreator.getTimeOrderedEpoch();
+                // 写入广告数据元表
                 adMapper.insert(new AdDAO()
                         .setUuid(timeOrderedEpoch)
                         .setFilePath(REPOSITORY_PATH + uuid + "/" + fileTypeEnum.getFileTypeString() + "/" + fileName)
@@ -98,6 +103,7 @@ public class UserRepositoryService {
                         .setType(fileTypeEnum.getFileTypeString())
                         .setFileSize(file.getSize())
                 );
+                // 写入连接表
                 userAdMapper.insert(new UserAdDAO().setUserUuid(timeOrderedEpoch).setUserUuid(uuid));
             } catch (Exception e) {
                 var tempPath = Paths.get(REPOSITORY_PATH + uuid + "/" + fileTypeEnum.getFileTypeString() + "/" + fileName);
@@ -114,8 +120,44 @@ public class UserRepositoryService {
     }
 
     public List<AdDAO> listFiles(UUID uuid, FileTypeEnum fileType, Integer pageNumber, Integer pageSize, FileSortByEnum fileSortByEnum, SortOrderEnum sortOrderEnum, String keyword){
-        // todo:应该读取数据库获得文件预览信息，而不是直接访问目录
+        Page<AdDAO> page = new Page<>(pageNumber, pageSize);
+        var wrapper = new MPJLambdaWrapper<UserAdDAO>();
 
-        return List.of();
+        // 筛选属于该用户的
+        wrapper.selectAll(UserAdDAO.class).eq(UserAdDAO::getUserUuid, uuid);
+
+        // 连接表
+        wrapper.leftJoin(AdDAO.class, AdDAO::getUuid, UserAdDAO::getAdUuid);
+
+        // 筛选属于该分类的
+        wrapper.eq(AdDAO::getType,fileType.getFileTypeString());
+
+        // 如果有关键词，先搜索关键词
+        if (keyword != null && !keyword.isBlank()) {
+            wrapper.and(w -> w.like(AdDAO::getTitle, keyword));
+        }
+
+        // 排序
+        if (sortOrderEnum != null) {
+            boolean isAsc = "asc".equalsIgnoreCase(sortOrderEnum.getSortOrderString());
+            wrapper.orderBy(true, isAsc, getSortField(fileSortByEnum));
+        }else {
+            wrapper.orderByDesc(AdDAO::getCreatedAt);
+        }
+
+        // 分页
+        Page<AdDAO> adDAOPage = userAdMapper.selectJoinPage(
+                page,
+                AdDAO.class,wrapper);
+
+        return new ArrayList<>(adDAOPage.getRecords());
+    }
+
+    private SFunction<AdDAO, ?> getSortField(FileSortByEnum sortBy) {
+        return switch (sortBy) {
+            case uuid -> AdDAO::getUuid;
+            case title -> AdDAO::getTitle;
+            case createdAt -> AdDAO::getCreatedAt;
+        };
     }
 }
