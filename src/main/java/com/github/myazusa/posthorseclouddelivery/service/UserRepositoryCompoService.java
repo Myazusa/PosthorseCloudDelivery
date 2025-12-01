@@ -1,13 +1,11 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.github.myazusa.posthorseclouddelivery.core.enums.FileSortByEnum;
 import com.github.myazusa.posthorseclouddelivery.core.enums.FileTypeEnum;
 import com.github.myazusa.posthorseclouddelivery.core.enums.SortOrderEnum;
 import com.github.myazusa.posthorseclouddelivery.core.exception.InvalidParamException;
-import com.github.myazusa.posthorseclouddelivery.model.dto.FilesResponseDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.ListFilesRequestDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UploadFilesRequestDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UserDetailsDTO;
+import com.github.myazusa.posthorseclouddelivery.model.dto.*;
 import com.github.myazusa.posthorseclouddelivery.service.micro.UserRepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserRepositoryCompoService {
@@ -123,7 +122,14 @@ public class UserRepositoryCompoService {
         return filesResponseDTOList;
     }
 
-    public void deleteFiles(Authentication authentication, ListFilesRequestDTO listFilesRequestDTO){
+    public void deleteFiles(Authentication authentication, DeleteFilesRequestDTO deleteFilesRequestDTO){
         var user = (UserDetailsDTO)authentication.getPrincipal();
+        List<UUID> fileUuidList;
+        try {
+            fileUuidList = deleteFilesRequestDTO.getFileUuidList().stream().map(UuidCreator::fromString).toList();
+        }catch (Exception e) {
+            throw new InvalidParamException("传入的参数列表中包含无效的广告数据元uuid");
+        }
+        userRepositoryService.deleteFiles(user.getUuid(), FileTypeEnum.fromString(deleteFilesRequestDTO.getFileType()),fileUuidList);
     }
 }

@@ -3,6 +3,7 @@ package com.github.myazusa.posthorseclouddelivery.service.micro;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.github.myazusa.posthorseclouddelivery.core.enums.UserRoleEnum;
 import com.github.myazusa.posthorseclouddelivery.core.exception.DataConflictException;
 import com.github.myazusa.posthorseclouddelivery.mapper.UserMapper;
 import com.github.myazusa.posthorseclouddelivery.model.dao.UserDAO;
@@ -16,11 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
     @Autowired
     public AuthUserDetailsService(UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
@@ -69,5 +72,10 @@ public class AuthUserDetailsService implements UserDetailsService {
         }
         user.setPassword(passwordEncoder.encode(password));
         userMapper.updateById(user);
+    }
+
+    public boolean verifyRole(UUID uuid, UserRoleEnum role) {
+        // todo:联表验证用户权限
+        return false;
     }
 }

@@ -1,18 +1,30 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service;
 
+import com.github.myazusa.posthorseclouddelivery.core.enums.UserRoleEnum;
+import com.github.myazusa.posthorseclouddelivery.model.dao.UserDAO;
+import com.github.myazusa.posthorseclouddelivery.model.dto.VerificationPasswordResponseDTO;
+import com.github.myazusa.posthorseclouddelivery.service.micro.AuthUserDetailsService;
 import com.github.myazusa.posthorseclouddelivery.service.micro.VerificationCodeCacheService;
+import com.github.myazusa.posthorseclouddelivery.service.micro.VerificationPasswordCacheService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
 
 @Service
-public class SmsCompoService {
+public class AuthenticatorCompoService {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9]{6,20}$");
     private final VerificationCodeCacheService verificationCodeCacheService;
+    private final VerificationPasswordCacheService verificationPasswordCacheService;
+    private final AuthUserDetailsService authUserDetailsService;
 
-    public SmsCompoService(VerificationCodeCacheService verificationCodeCacheService) {
+    @Autowired
+    public AuthenticatorCompoService(VerificationCodeCacheService verificationCodeCacheService, VerificationPasswordCacheService verificationPasswordCacheService, AuthUserDetailsService authUserDetailsService) {
         this.verificationCodeCacheService = verificationCodeCacheService;
+        this.verificationPasswordCacheService = verificationPasswordCacheService;
+        this.authUserDetailsService = authUserDetailsService;
     }
 
     /**
@@ -70,11 +82,36 @@ public class SmsCompoService {
         return verificationCodeCacheService.verifyCode(phone,inputCode);
     }
 
+
+    /**
+     * 查询验证器密码
+     * @param authentication
+     * @return
+     */
+    public VerificationPasswordResponseDTO queryPassword(Authentication authentication) {
+        var user = (UserDAO)authentication.getPrincipal();
+        // 验证用户是否有这个添加设备权限
+        authUserDetailsService.verifyRole(user.getUuid(), UserRoleEnum.deviceAdder);
+
+        var verificationPasswordDAO = verificationPasswordCacheService.queryPassword();
+        return new VerificationPasswordResponseDTO().setVerifyPassword(verificationPasswordDAO.getVerifyPassword())
+                .setExpireAt(verificationPasswordDAO.getExpireAt())
+                .setCreatedAt(verificationPasswordDAO.getCreatedAt());
+    }
+
     /***
-     * 定时任务自动清除过期的code
+     * 定时任务自动清除过期的code，毫秒
      */
     @Scheduled(fixedDelay = 60000)
     public void cleanupExpired() {
         verificationCodeCacheService.cleanupExpired();
+    }
+
+    /***
+     * 定时任务自动更新password
+     */
+    @Scheduled(fixedDelay = 1800000)
+    public void updatePassword() {
+        verificationPasswordCacheService.updatePassword();
     }
 }

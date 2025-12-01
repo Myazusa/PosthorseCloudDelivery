@@ -3,15 +3,19 @@
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.myazusa.posthorseclouddelivery.mapper.VerificationCodeCacheMapper;
 import com.github.myazusa.posthorseclouddelivery.model.dao.VerificationCodeDAO;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class VerificationCodeCacheService {
     private final VerificationCodeCacheMapper verificationCodeCacheMapper;
+
+    @Autowired
+    public VerificationCodeCacheService(VerificationCodeCacheMapper verificationCodeCacheMapper) {
+        this.verificationCodeCacheMapper = verificationCodeCacheMapper;
+    }
 
     public void saveCode(String phone, String code) {
         VerificationCodeDAO cache = new VerificationCodeDAO();

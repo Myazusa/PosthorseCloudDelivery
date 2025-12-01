@@ -4,14 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-public class DeleteFilesRequestDTO {
+public class AddDeviceRequestDTO {
+    private String deviceName;
+    private double latitude;
+    private double longitude;
+
     @NotNull
     @NotBlank
-    private String fileType;
-
-    @NotNull
-    private List<String> fileUuidList;
+    private String verifyPassword;
 }

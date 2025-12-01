@@ -1,6 +1,8 @@
 package com.github.myazusa.posthorseclouddelivery.controller;
 
 import com.github.myazusa.posthorseclouddelivery.model.dto.*;
+import com.github.myazusa.posthorseclouddelivery.service.AuthenticatorCompoService;
+import com.github.myazusa.posthorseclouddelivery.service.DeviceCompoService;
 import com.github.myazusa.posthorseclouddelivery.service.JwtAuthCompoService;
 import com.github.myazusa.posthorseclouddelivery.service.UserRepositoryCompoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +20,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ProtectedController {
     private final JwtAuthCompoService jwtAuthCompoService;
     private final UserRepositoryCompoService userRepositoryCompoService;
+    private final AuthenticatorCompoService authenticatorCompoService;
 
     @Autowired
-    public ProtectedController(JwtAuthCompoService jwtAuthCompoService, UserRepositoryCompoService userRepositoryCompoService) {
+    public ProtectedController(JwtAuthCompoService jwtAuthCompoService, UserRepositoryCompoService userRepositoryCompoService, AuthenticatorCompoService authenticatorCompoService) {
         this.jwtAuthCompoService = jwtAuthCompoService;
         this.userRepositoryCompoService = userRepositoryCompoService;
+        this.authenticatorCompoService = authenticatorCompoService;
     }
 
     @PostMapping("/reset-password")
@@ -40,7 +44,7 @@ public class ProtectedController {
     @PostMapping("/upload-files")
     public ResponseEntity<?> uploadFiles(Authentication authentication, @RequestBody UploadFilesRequestDTO uploadFilesRequestDTO){
         userRepositoryCompoService.saveFiles(authentication,uploadFilesRequestDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("上传成功"));
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("上传文件成功"));
     }
 
     @PostMapping("/list-files")
@@ -51,6 +55,13 @@ public class ProtectedController {
 
     @PostMapping("/delete-files")
     public ResponseEntity<?> deleteFiles(Authentication authentication,@RequestBody DeleteFilesRequestDTO deleteFilesRequestDTO){
-        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("删除成功"));
+        userRepositoryCompoService.deleteFiles(authentication,deleteFilesRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("删除文件成功"));
+    }
+
+    @PostMapping("/query-authenticator")
+    public ResponseEntity<?> queryAuthenticator(Authentication authentication){
+        var dto = authenticatorCompoService.queryPassword(authentication);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取验证器密码成功").setData(dto));
     }
 }

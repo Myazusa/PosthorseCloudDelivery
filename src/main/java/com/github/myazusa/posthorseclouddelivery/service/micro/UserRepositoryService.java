@@ -1,5 +1,6 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service.micro;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -151,6 +152,31 @@ public class UserRepositoryService {
                 AdDAO.class,wrapper);
 
         return new ArrayList<>(adDAOPage.getRecords());
+    }
+
+    @Transactional
+    public void deleteFiles(UUID uuid, FileTypeEnum fileTypeEnum, List<UUID> fileUuidList){
+        var wrapper = new MPJLambdaWrapper<UserAdDAO>();
+
+        // 筛选属于该用户的
+        wrapper.selectAll(UserAdDAO.class)
+                .eq(UserAdDAO::getUserUuid, uuid)
+                .leftJoin(AdDAO.class, AdDAO::getUuid, UserAdDAO::getAdUuid)
+                .eq(AdDAO::getType,fileTypeEnum.getFileTypeString())
+                .in(AdDAO::getUuid,fileUuidList);
+
+        // 联表筛选符合是该用户的数据，获取正确的list
+        List<UUID> verifyList = userAdMapper.selectJoinList(UUID.class,wrapper);
+
+        if (verifyList.isEmpty()) {
+            return;
+        }
+
+        // 先删除关联关系
+        userAdMapper.delete(new QueryWrapper<UserAdDAO>().in("ad_uuid", verifyList));
+
+        // 再删除设备记录
+        adMapper.delete(new QueryWrapper<AdDAO>().in("uuid", verifyList));
     }
 
     private SFunction<AdDAO, ?> getSortField(FileSortByEnum sortBy) {

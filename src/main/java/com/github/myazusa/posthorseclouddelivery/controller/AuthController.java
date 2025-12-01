@@ -1,11 +1,9 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.controller;
 
-import com.github.myazusa.posthorseclouddelivery.model.dto.InformationResponseDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UserAuthRequestDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UserRegisterRequestDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UserVerificationCodeRequestDTO;
+import com.github.myazusa.posthorseclouddelivery.model.dto.*;
+import com.github.myazusa.posthorseclouddelivery.service.AuthenticatorCompoService;
+import com.github.myazusa.posthorseclouddelivery.service.DeviceCompoService;
 import com.github.myazusa.posthorseclouddelivery.service.JwtAuthCompoService;
-import com.github.myazusa.posthorseclouddelivery.service.SmsCompoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final JwtAuthCompoService jwtAuthCompoService;
-    private final SmsCompoService smsCompoService;
+    private final AuthenticatorCompoService authenticatorCompoService;
+    private final DeviceCompoService deviceCompoService;
 
     @Autowired
-    public AuthController(JwtAuthCompoService jwtAuthCompoService, SmsCompoService smsCompoService) {
+    public AuthController(JwtAuthCompoService jwtAuthCompoService, AuthenticatorCompoService authenticatorCompoService, DeviceCompoService deviceCompoService) {
         this.jwtAuthCompoService = jwtAuthCompoService;
-        this.smsCompoService = smsCompoService;
+        this.authenticatorCompoService = authenticatorCompoService;
+        this.deviceCompoService = deviceCompoService;
     }
 
     @PostMapping("/login")
@@ -43,19 +43,19 @@ public class AuthController {
         String phone = userVerificationCodeRequestDTO.getUsername();
 
         // 检验手机号是否符合格式
-        if (!smsCompoService.isValidPhone(phone)) {
+        if (!authenticatorCompoService.isValidPhone(phone)) {
             return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage("手机号格式错误"));
         }
 
         // 检验是否重复发送
-        if (!smsCompoService.canSend(phone)) {
+        if (!authenticatorCompoService.canSend(phone)) {
             return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage("发送过于频繁，请稍后再试"));
         }
 
         // 生成code并记录，调用第三方服务去发短信
-        String code = smsCompoService.generateCode();
-        smsCompoService.sendSms(phone, code);
-        smsCompoService.saveCode(phone, code);
+        String code = authenticatorCompoService.generateCode();
+        authenticatorCompoService.sendSms(phone, code);
+        authenticatorCompoService.saveCode(phone, code);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("成功发送验证码"));
     }
 
@@ -65,11 +65,17 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage("未填写验证码"));
         }
 
-        if (!smsCompoService.verifyCode(userVerificationCodeRequestDTO.getUsername(), userVerificationCodeRequestDTO.getCode())) {
+        if (!authenticatorCompoService.verifyCode(userVerificationCodeRequestDTO.getUsername(), userVerificationCodeRequestDTO.getCode())) {
             return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage("验证码错误或已过期"));
         }
 
         // todo: 这里需要走登录逻辑
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success"));
+    }
+
+    @PostMapping("/add-device")
+    public ResponseEntity<?> addDevice(@RequestBody AddDeviceRequestDTO addDeviceRequestDTO){
+        var deviceUuid = deviceCompoService.addDevice(addDeviceRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("添加设备成功").setData(deviceUuid));
     }
 }

@@ -41,6 +41,13 @@ CREATE UNLOGGED TABLE verification_code_cache (
 );
 CREATE INDEX idx_code_phone ON verification_code_cache (phone);
 
+CREATE UNLOGGED TABLE verification_password_cache (
+  id BIGSERIAL PRIMARY KEY,
+  verifyPassword VARCHAR(6) NOT NULL,
+  expire_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT now()
+);
+
 -- 设备表
 CREATE TABLE device
 (
