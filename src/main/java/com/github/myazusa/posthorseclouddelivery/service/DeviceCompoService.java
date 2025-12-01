@@ -16,6 +16,11 @@ public class DeviceCompoService {
         this.deviceService = deviceService;
     }
 
+    /**
+     * 添加设备
+     * @param addDeviceRequestDTO
+     * @return 返回设备的uuid
+     */
     public UUID addDevice(AddDeviceRequestDTO addDeviceRequestDTO){
         return deviceService.addDevice(addDeviceRequestDTO.getDeviceName(),addDeviceRequestDTO.getLatitude(),addDeviceRequestDTO.getLongitude(),addDeviceRequestDTO.getVerifyPassword());
     }

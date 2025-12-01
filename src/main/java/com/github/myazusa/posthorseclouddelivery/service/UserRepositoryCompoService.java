@@ -40,7 +40,7 @@ public class UserRepositoryCompoService {
     }
 
     /**
-     * 保存文件的方法
+     * 保存文件的方法，批量
      * @param authentication
      * @param uploadFilesRequestDTO
      */
@@ -122,6 +122,11 @@ public class UserRepositoryCompoService {
         return filesResponseDTOList;
     }
 
+    /**
+     * 删除广告数据元，批量
+     * @param authentication
+     * @param deleteFilesRequestDTO 对象里要带有广告数据源uuid的列表
+     */
     public void deleteFiles(Authentication authentication, DeleteFilesRequestDTO deleteFilesRequestDTO){
         var user = (UserDetailsDTO)authentication.getPrincipal();
         List<UUID> fileUuidList;
