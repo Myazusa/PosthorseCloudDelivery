@@ -2,6 +2,8 @@
 
 import com.github.myazusa.posthorseclouddelivery.model.dao.UserRoleDAO;
 import com.github.yulichang.base.MPJBaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
+@Mapper
 public interface UserRoleMapper extends MPJBaseMapper<UserRoleDAO> {
 }

@@ -61,8 +61,8 @@ public class JwtAuthCompoService {
      * @param userAuthRequestDTO 手机号和密码
      */
     public void resetPassword(Authentication authentication, UserAuthRequestDTO userAuthRequestDTO){
-        UserDetailsDTO userDetailsDTO = (UserDetailsDTO) authentication.getPrincipal();
-        String phone = userDetailsDTO.getUsername();
+        var userDetailsDTO = (UserDetailsDTO) authentication.getPrincipal();
+        var phone = userDetailsDTO.getUsername();
         if (phone == null || phone.isBlank()) {
             throw new AuthUserException("token解析出来的手机号为空");
         }

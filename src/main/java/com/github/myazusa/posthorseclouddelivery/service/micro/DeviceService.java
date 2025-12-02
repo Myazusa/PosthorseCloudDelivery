@@ -3,7 +3,9 @@
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.github.myazusa.posthorseclouddelivery.core.exception.AuthUserException;
 import com.github.myazusa.posthorseclouddelivery.mapper.DeviceMapper;
+import com.github.myazusa.posthorseclouddelivery.mapper.UserDeviceMapper;
 import com.github.myazusa.posthorseclouddelivery.model.dao.DeviceDAO;
+import com.github.myazusa.posthorseclouddelivery.model.dao.UserDeviceDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +14,13 @@ import java.util.UUID;
 @Service
 public class DeviceService {
     private final DeviceMapper deviceMapper;
+    private final UserDeviceMapper userDeviceMapper;
     private final VerificationPasswordCacheService verificationPasswordCacheService;
 
     @Autowired
-    public DeviceService(DeviceMapper deviceMapper, VerificationPasswordCacheService verificationPasswordCacheService) {
+    public DeviceService(DeviceMapper deviceMapper, UserDeviceMapper userDeviceMapper, VerificationPasswordCacheService verificationPasswordCacheService) {
         this.deviceMapper = deviceMapper;
+        this.userDeviceMapper = userDeviceMapper;
         this.verificationPasswordCacheService = verificationPasswordCacheService;
     }
 
@@ -27,5 +31,9 @@ public class DeviceService {
             deviceMapper.insert(new DeviceDAO().setUuid(deviceUuid).setLongitude(longitude).setLatitude(latitude));
         }
         return deviceUuid;
+    }
+
+    public void bindDevice(UUID userUuid, UUID deviceUuid) {
+        userDeviceMapper.insert(new UserDeviceDAO().setUserUuid(userUuid).setDeviceUuid(deviceUuid));
     }
 }

@@ -21,12 +21,14 @@ public class ProtectedController {
     private final JwtAuthCompoService jwtAuthCompoService;
     private final UserRepositoryCompoService userRepositoryCompoService;
     private final AuthenticatorCompoService authenticatorCompoService;
+    private final DeviceCompoService deviceCompoService;
 
     @Autowired
-    public ProtectedController(JwtAuthCompoService jwtAuthCompoService, UserRepositoryCompoService userRepositoryCompoService, AuthenticatorCompoService authenticatorCompoService) {
+    public ProtectedController(JwtAuthCompoService jwtAuthCompoService, UserRepositoryCompoService userRepositoryCompoService, AuthenticatorCompoService authenticatorCompoService, DeviceCompoService deviceCompoService) {
         this.jwtAuthCompoService = jwtAuthCompoService;
         this.userRepositoryCompoService = userRepositoryCompoService;
         this.authenticatorCompoService = authenticatorCompoService;
+        this.deviceCompoService = deviceCompoService;
     }
 
     @PostMapping("/reset-password")
@@ -63,5 +65,11 @@ public class ProtectedController {
     public ResponseEntity<?> queryAuthenticator(Authentication authentication){
         var dto = authenticatorCompoService.queryPassword(authentication);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取验证器密码成功").setData(dto));
+    }
+
+    @PostMapping("/bind-device")
+    public ResponseEntity<?> bindDevice(Authentication authentication,BindDeviceRequestDTO bindDeviceRequestDTO){
+        deviceCompoService.bindDevice(authentication,bindDeviceRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("绑定成功"));
     }
 }

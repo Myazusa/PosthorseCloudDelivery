@@ -6,8 +6,10 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import com.github.myazusa.posthorseclouddelivery.core.enums.UserRoleEnum;
 import com.github.myazusa.posthorseclouddelivery.core.exception.DataConflictException;
 import com.github.myazusa.posthorseclouddelivery.mapper.UserMapper;
-import com.github.myazusa.posthorseclouddelivery.model.dao.UserDAO;
+import com.github.myazusa.posthorseclouddelivery.mapper.UserRoleMapper;
+import com.github.myazusa.posthorseclouddelivery.model.dao.*;
 import com.github.myazusa.posthorseclouddelivery.model.dto.UserDetailsDTO;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,11 +25,13 @@ import java.util.UUID;
 public class AuthUserDetailsService implements UserDetailsService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserRoleMapper userRoleMapper;
 
     @Autowired
-    public AuthUserDetailsService(UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public AuthUserDetailsService(UserMapper userMapper, PasswordEncoder passwordEncoder, UserRoleMapper userRoleMapper) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.userRoleMapper = userRoleMapper;
     }
 
     @Override
@@ -75,7 +79,14 @@ public class AuthUserDetailsService implements UserDetailsService {
     }
 
     public boolean verifyRole(UUID uuid, UserRoleEnum role) {
-        // todo:联表验证用户权限
-        return false;
+        // 联表验证用户权限
+        var wrapper = new MPJLambdaWrapper<UserRoleDAO>();
+
+        wrapper.selectAll(UserRoleDAO.class)
+                .eq(UserRoleDAO::getUserUuid, uuid)
+                .leftJoin(RoleDAO.class, RoleDAO::getUuid, UserRoleDAO::getRoleUuid)
+                .eq(RoleDAO::getName,role.getUserRoleString());
+
+        return userRoleMapper.exists(wrapper);
     }
 }

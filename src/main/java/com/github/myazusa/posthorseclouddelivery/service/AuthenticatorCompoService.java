@@ -1,7 +1,8 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service;
 
 import com.github.myazusa.posthorseclouddelivery.core.enums.UserRoleEnum;
-import com.github.myazusa.posthorseclouddelivery.model.dao.UserDAO;
+import com.github.myazusa.posthorseclouddelivery.core.exception.AuthUserException;
+import com.github.myazusa.posthorseclouddelivery.model.dto.UserDetailsDTO;
 import com.github.myazusa.posthorseclouddelivery.model.dto.VerificationPasswordResponseDTO;
 import com.github.myazusa.posthorseclouddelivery.service.micro.AuthUserDetailsService;
 import com.github.myazusa.posthorseclouddelivery.service.micro.VerificationCodeCacheService;
@@ -89,9 +90,9 @@ public class AuthenticatorCompoService {
      * @return
      */
     public VerificationPasswordResponseDTO queryPassword(Authentication authentication) {
-        var user = (UserDAO)authentication.getPrincipal();
+        var user = (UserDetailsDTO) authentication.getPrincipal();
         // 验证用户是否有这个添加设备权限
-        authUserDetailsService.verifyRole(user.getUuid(), UserRoleEnum.deviceAdder);
+        if(!authUserDetailsService.verifyRole(user.getUuid(), UserRoleEnum.deviceAdder)) throw new AuthUserException("此账号没有添加设备权限");
 
         var verificationPasswordDAO = verificationPasswordCacheService.queryPassword();
         return new VerificationPasswordResponseDTO().setVerifyPassword(verificationPasswordDAO.getVerifyPassword())
