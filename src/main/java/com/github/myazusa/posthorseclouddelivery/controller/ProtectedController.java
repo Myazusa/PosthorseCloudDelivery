@@ -67,13 +67,13 @@ public class ProtectedController {
     }
 
     @PostMapping("/bind-device")
-    public ResponseEntity<?> bindDevice(Authentication authentication,BindDeviceRequestDTO bindDeviceRequestDTO){
+    public ResponseEntity<?> bindDevice(Authentication authentication,@RequestBody BindDeviceRequestDTO bindDeviceRequestDTO){
         deviceCompoService.bindDevice(authentication,bindDeviceRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("绑定成功"));
     }
 
     @PostMapping("/unbind-device")
-    public ResponseEntity<?> unbindDevice(Authentication authentication,BindDeviceRequestDTO bindDeviceRequestDTO){
+    public ResponseEntity<?> unbindDevice(Authentication authentication,@RequestBody BindDeviceRequestDTO bindDeviceRequestDTO){
         deviceCompoService.unbindDevice(authentication,bindDeviceRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("解除绑定成功"));
     }
@@ -87,7 +87,7 @@ public class ProtectedController {
 
 
     @PostMapping("/add-roles")
-    public ResponseEntity<?> addRoles(Authentication authentication,AddRoleDTO addRoleDTO){
+    public ResponseEntity<?> addRoles(Authentication authentication,@RequestBody AddRoleDTO addRoleDTO){
         userCompoService.addRoles(authentication,addRoleDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("添加权限成功"));
     }
