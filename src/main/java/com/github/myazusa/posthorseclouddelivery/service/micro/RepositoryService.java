@@ -1,5 +1,6 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service.micro;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -28,13 +29,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class UserRepositoryService {
+public class RepositoryService {
     public static final String REPOSITORY_PATH = "./uploads/";
     private final AdMapper adMapper;
     private final UserAdMapper userAdMapper;
 
     @Autowired
-    public UserRepositoryService(AdMapper adMapper, UserAdMapper userAdMapper) {
+    public RepositoryService(AdMapper adMapper, UserAdMapper userAdMapper) {
         this.adMapper = adMapper;
         this.userAdMapper = userAdMapper;
     }
@@ -173,10 +174,10 @@ public class UserRepositoryService {
         }
 
         // 先删除关联关系
-        userAdMapper.delete(new QueryWrapper<UserAdDAO>().in("ad_uuid", verifyList));
+        userAdMapper.delete(new LambdaQueryWrapper<UserAdDAO>().in(UserAdDAO::getAdUuid, verifyList));
 
         // 再删除设备记录
-        adMapper.delete(new QueryWrapper<AdDAO>().in("uuid", verifyList));
+        adMapper.delete(new LambdaQueryWrapper<AdDAO>().in(AdDAO::getUuid, verifyList));
     }
 
     private SFunction<AdDAO, ?> getSortField(FileSortByEnum sortBy) {

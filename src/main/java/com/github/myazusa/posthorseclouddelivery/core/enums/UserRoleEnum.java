@@ -2,8 +2,10 @@ package com.github.myazusa.posthorseclouddelivery.core.enums;
 
 public enum UserRoleEnum {
     login("login"), // 拥有该权限用户可以登录
-    deviceAdder("deviceAdder"), // 拥有该权限可以获得设备验证器的密码
-    deviceBinder("deviceBinder"), // 拥有该权限可以绑定用户和设备
+    addRole("addRole"), // 拥有该权限用户可以修改其他用户权限
+    addDevice("addDevice"), // 拥有该权限可以获得设备验证器的密码
+    bindDevice("bindDevice"), // 拥有该权限可以绑定用户和设备
+    unbindDevice("unbindDevice"), // 拥有该权限可以绑解绑用户和设备
     manageUsers("manageUsers"); // 拥有该权限用户可以修改其他用户
 
     private final String role;

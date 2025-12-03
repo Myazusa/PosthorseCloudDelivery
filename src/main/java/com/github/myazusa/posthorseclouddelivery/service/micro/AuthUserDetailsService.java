@@ -25,13 +25,12 @@ import java.util.UUID;
 public class AuthUserDetailsService implements UserDetailsService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final UserRoleMapper userRoleMapper;
+
 
     @Autowired
-    public AuthUserDetailsService(UserMapper userMapper, PasswordEncoder passwordEncoder, UserRoleMapper userRoleMapper) {
+    public AuthUserDetailsService(UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.userRoleMapper = userRoleMapper;
     }
 
     @Override
@@ -78,15 +77,5 @@ public class AuthUserDetailsService implements UserDetailsService {
         userMapper.updateById(user);
     }
 
-    public boolean verifyRole(UUID uuid, UserRoleEnum role) {
-        // 联表验证用户权限
-        var wrapper = new MPJLambdaWrapper<UserRoleDAO>();
 
-        wrapper.selectAll(UserRoleDAO.class)
-                .eq(UserRoleDAO::getUserUuid, uuid)
-                .leftJoin(RoleDAO.class, RoleDAO::getUuid, UserRoleDAO::getRoleUuid)
-                .eq(RoleDAO::getName,role.getUserRoleString());
-
-        return userRoleMapper.exists(wrapper);
-    }
 }

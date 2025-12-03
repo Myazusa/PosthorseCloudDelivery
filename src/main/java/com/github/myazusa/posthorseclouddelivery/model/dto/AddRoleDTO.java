@@ -7,12 +7,11 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class BindDeviceRequestDTO {
-    @NotBlank
+public class AddRoleDTO {
     @NotNull
-    private List<String> deviceUuidList;
-
     @NotBlank
-    @NotNull
     private String userUuid;
+
+    @NotNull
+    private List<String> roles;
 }

@@ -66,7 +66,7 @@ CREATE TABLE user_device
 (
     user_uuid INT REFERENCES user (uuid) ON DELETE CASCADE,
     device_uuid INT REFERENCES device (uuid) ON DELETE CASCADE,
-    UNIQUE (user_uuid, device_uuid)
+    UNIQUE (device_uuid)
 )
 
 -- 广告元数据表

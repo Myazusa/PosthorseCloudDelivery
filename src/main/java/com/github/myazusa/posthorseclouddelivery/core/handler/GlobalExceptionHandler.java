@@ -1,5 +1,6 @@
 package com.github.myazusa.posthorseclouddelivery.core.handler;
 
+import com.github.f4b6a3.uuid.exception.InvalidUuidException;
 import com.github.myazusa.posthorseclouddelivery.core.exception.*;
 import com.github.myazusa.posthorseclouddelivery.model.dto.InformationResponseDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -61,9 +62,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage(e.getMessage()));
     }
 
+    // 捕获前端传入无效参数的异常
     @ExceptionHandler(InvalidParamException.class)
     public ResponseEntity<?> handleInvalidParamException(Exception e){
         log.error("业务异常: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage(e.getMessage()));
+    }
+
+    // 捕获uuid无效的异常，捕获的这个类不属于本项目
+    @ExceptionHandler(InvalidUuidException.class)
+    public ResponseEntity<?> handleInvalidUuidException(Exception e){
+        log.error("业务异常: {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("error").setMessage("无效的uuid"));
     }
 }

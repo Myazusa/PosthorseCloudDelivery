@@ -4,7 +4,7 @@ import com.github.myazusa.posthorseclouddelivery.core.enums.UserRoleEnum;
 import com.github.myazusa.posthorseclouddelivery.core.exception.AuthUserException;
 import com.github.myazusa.posthorseclouddelivery.model.dto.UserDetailsDTO;
 import com.github.myazusa.posthorseclouddelivery.model.dto.VerificationPasswordResponseDTO;
-import com.github.myazusa.posthorseclouddelivery.service.micro.AuthUserDetailsService;
+import com.github.myazusa.posthorseclouddelivery.service.micro.UserRoleService;
 import com.github.myazusa.posthorseclouddelivery.service.micro.VerificationCodeCacheService;
 import com.github.myazusa.posthorseclouddelivery.service.micro.VerificationPasswordCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ public class AuthenticatorCompoService {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9]{6,20}$");
     private final VerificationCodeCacheService verificationCodeCacheService;
     private final VerificationPasswordCacheService verificationPasswordCacheService;
-    private final AuthUserDetailsService authUserDetailsService;
+    private final UserRoleService userRoleService;
 
     @Autowired
-    public AuthenticatorCompoService(VerificationCodeCacheService verificationCodeCacheService, VerificationPasswordCacheService verificationPasswordCacheService, AuthUserDetailsService authUserDetailsService) {
+    public AuthenticatorCompoService(VerificationCodeCacheService verificationCodeCacheService, VerificationPasswordCacheService verificationPasswordCacheService, UserRoleService userRoleService) {
         this.verificationCodeCacheService = verificationCodeCacheService;
         this.verificationPasswordCacheService = verificationPasswordCacheService;
-        this.authUserDetailsService = authUserDetailsService;
+        this.userRoleService = userRoleService;
     }
 
     /**
@@ -92,7 +92,7 @@ public class AuthenticatorCompoService {
     public VerificationPasswordResponseDTO queryPassword(Authentication authentication) {
         var user = (UserDetailsDTO) authentication.getPrincipal();
         // 验证用户是否有这个添加设备权限
-        if(!authUserDetailsService.verifyRole(user.getUuid(), UserRoleEnum.deviceAdder)) throw new AuthUserException("此账号没有添加设备权限");
+        if(!userRoleService.verifyRole(user.getUuid(), UserRoleEnum.addDevice)) throw new AuthUserException("此账号没有添加设备权限");
 
         var verificationPasswordDAO = verificationPasswordCacheService.queryPassword();
         return new VerificationPasswordResponseDTO().setVerifyPassword(verificationPasswordDAO.getVerifyPassword())

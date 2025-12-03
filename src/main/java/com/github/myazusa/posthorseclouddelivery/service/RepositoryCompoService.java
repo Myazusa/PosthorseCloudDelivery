@@ -6,7 +6,7 @@ import com.github.myazusa.posthorseclouddelivery.core.enums.FileTypeEnum;
 import com.github.myazusa.posthorseclouddelivery.core.enums.SortOrderEnum;
 import com.github.myazusa.posthorseclouddelivery.core.exception.InvalidParamException;
 import com.github.myazusa.posthorseclouddelivery.model.dto.*;
-import com.github.myazusa.posthorseclouddelivery.service.micro.UserRepositoryService;
+import com.github.myazusa.posthorseclouddelivery.service.micro.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class UserRepositoryCompoService {
-    private final UserRepositoryService userRepositoryService;
+public class RepositoryCompoService {
+    private final RepositoryService repositoryService;
     public final static String VIDEO_FOLDER_NAME = "video";
     public final static String IMAGE_FOLDER_NAME = "image";
 
     @Autowired
-    public UserRepositoryCompoService(UserRepositoryService userRepositoryService) {
-        this.userRepositoryService = userRepositoryService;
+    public RepositoryCompoService(RepositoryService repositoryService) {
+        this.repositoryService = repositoryService;
     }
 
     /**
@@ -34,9 +34,9 @@ public class UserRepositoryCompoService {
         var user = (UserDetailsDTO)authentication.getPrincipal();
 
         // 在本地创建用户专属目录
-        userRepositoryService.createRepository(user.getUuid());
-        userRepositoryService.createFolder(user.getUuid(), VIDEO_FOLDER_NAME);
-        userRepositoryService.createFolder(user.getUuid(), IMAGE_FOLDER_NAME);
+        repositoryService.createRepository(user.getUuid());
+        repositoryService.createFolder(user.getUuid(), VIDEO_FOLDER_NAME);
+        repositoryService.createFolder(user.getUuid(), IMAGE_FOLDER_NAME);
     }
 
     /**
@@ -53,7 +53,7 @@ public class UserRepositoryCompoService {
             throw new InvalidParamException("传入的fileType参数不正确，不允许上传video和image之外的类型");
         }
 
-        userRepositoryService.saveFiles(user.getUuid(),fileTypeEnum,uploadFilesRequestDTO.getFiles());
+        repositoryService.saveFiles(user.getUuid(),fileTypeEnum,uploadFilesRequestDTO.getFiles());
     }
 
     /**
@@ -97,7 +97,7 @@ public class UserRepositoryCompoService {
         }
 
         // 拆包传入
-        var adDAOList = userRepositoryService.listFiles(user.getUuid(),
+        var adDAOList = repositoryService.listFiles(user.getUuid(),
                 fileTypeEnum,
                 listFilesRequestDTO.getPageNumber(),
                 listFilesRequestDTO.getPageSize(),
@@ -135,6 +135,6 @@ public class UserRepositoryCompoService {
         }catch (Exception e) {
             throw new InvalidParamException("传入的参数列表中包含无效的广告数据元uuid");
         }
-        userRepositoryService.deleteFiles(user.getUuid(), FileTypeEnum.fromString(deleteFilesRequestDTO.getFileType()),fileUuidList);
+        repositoryService.deleteFiles(user.getUuid(), FileTypeEnum.fromString(deleteFilesRequestDTO.getFileType()),fileUuidList);
     }
 }
