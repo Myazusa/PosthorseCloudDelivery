@@ -1,5 +1,6 @@
 package com.github.myazusa.posthorseclouddelivery.controller;
 
+import com.github.myazusa.posthorseclouddelivery.model.dao.RoleDAO;
 import com.github.myazusa.posthorseclouddelivery.model.dto.*;
 import com.github.myazusa.posthorseclouddelivery.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // 这是受保护的接口
 @Controller
@@ -87,12 +91,34 @@ public class ProtectedController {
 
 
     @PostMapping("/add-roles")
-    public ResponseEntity<?> addRoles(Authentication authentication,@RequestBody AddRoleDTO addRoleDTO){
-        userCompoService.addRoles(authentication,addRoleDTO);
+    public ResponseEntity<?> addRoles(Authentication authentication,@RequestBody AlterRoleRequestDTO alterRoleRequestDTO){
+        userCompoService.addRoles(authentication, alterRoleRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("添加权限成功"));
     }
 
-    /**
-     * 查询用户接口
-     */
+    @PostMapping("/remove-roles")
+    public ResponseEntity<?> removeRoles(Authentication authentication,@RequestBody AlterRoleRequestDTO alterRoleRequestDTO){
+        userCompoService.removeRoles(authentication,alterRoleRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("移除权限成功"));
+    }
+
+    @PostMapping("/query-roles")
+    public ResponseEntity<?> queryRoles(Authentication authentication,@RequestBody UserUuidRequestDTO userUuidRequestDTO){
+        var data = userCompoService.queryRoles(authentication,userUuidRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取用户权限成功").setData(data));
+    }
+
+    @PostMapping("/query-users")
+    public ResponseEntity<?> queryUsers(Authentication authentication,@RequestBody UserUuidRequestDTO userUuidRequestDTO){
+        var data = new ArrayList<>();
+        // todo: 写完
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取用户列表成功").setData(data));
+    }
+
+    @PostMapping("/query-user-info")
+    public ResponseEntity<?> queryUserInfo(Authentication authentication,@RequestBody UserUuidRequestDTO userUuidRequestDTO){
+        var data = new ArrayList<>();
+        // todo: 写完
+        return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取用户信息成功").setData(data));
+    }
 }
