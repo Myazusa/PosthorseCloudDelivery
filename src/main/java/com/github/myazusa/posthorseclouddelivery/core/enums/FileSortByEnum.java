@@ -21,6 +21,6 @@ public enum FileSortByEnum {
                 return fileSortBy;
             }
         }
-        throw new IllegalArgumentException("从字符串转换到用户权限枚举失败");
+        throw new IllegalArgumentException("从字符串转换到数据库字段枚举失败");
     }
 }

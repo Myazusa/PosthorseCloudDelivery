@@ -83,9 +83,8 @@ public class ProtectedController {
     }
 
     @PostMapping("/query-bound-device")
-    public ResponseEntity<?> queryBoundDevice(Authentication authentication){
-        // todo：还需要考虑管理员来查询
-        var data = deviceCompoService.queryBoundDevice(authentication);
+    public ResponseEntity<?> queryBoundDevice(Authentication authentication,@RequestBody UserUuidRequestDTO userUuidRequestDTO){
+        var data = deviceCompoService.queryBoundDevice(authentication,userUuidRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("查询账号绑定设备成功").setData(data));
     }
 
@@ -109,16 +108,14 @@ public class ProtectedController {
     }
 
     @PostMapping("/query-users")
-    public ResponseEntity<?> queryUsers(Authentication authentication,@RequestBody UserUuidRequestDTO userUuidRequestDTO){
-        var data = new ArrayList<>();
-        // todo: 写完
+    public ResponseEntity<?> queryUsers(Authentication authentication,@RequestBody ListUserRequestDTO listUserRequestDTO){
+        var data = userCompoService.queryUsers(authentication,listUserRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取用户列表成功").setData(data));
     }
 
     @PostMapping("/query-user-info")
     public ResponseEntity<?> queryUserInfo(Authentication authentication,@RequestBody UserUuidRequestDTO userUuidRequestDTO){
-        var data = new ArrayList<>();
-        // todo: 写完
+        var data = userCompoService.queryUserInfo(authentication,userUuidRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(new InformationResponseDTO().setState("success").setMessage("获取用户信息成功").setData(data));
     }
 }

@@ -9,6 +9,7 @@ import com.github.myazusa.posthorseclouddelivery.model.dao.UserDeviceDAO;
 import com.github.myazusa.posthorseclouddelivery.model.dto.AddDeviceRequestDTO;
 import com.github.myazusa.posthorseclouddelivery.model.dto.BindDeviceRequestDTO;
 import com.github.myazusa.posthorseclouddelivery.model.dto.UserDetailsDTO;
+import com.github.myazusa.posthorseclouddelivery.model.dto.UserUuidRequestDTO;
 import com.github.myazusa.posthorseclouddelivery.service.micro.DeviceService;
 import com.github.myazusa.posthorseclouddelivery.service.micro.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +61,19 @@ public class DeviceCompoService {
     }
 
     /**
-     * 查询用户已绑定的设备列表
+     * 查询用户已绑定的设备列表，管理和用户共用
+     *
      * @param authentication
+     * @param userUuidRequestDTO 如果是管理员则需要这个
      * @return
      */
-    public List<DeviceDAO> queryBoundDevice(Authentication authentication){
-        var user = (UserDeviceDAO) authentication.getPrincipal();
-        return deviceService.queryBoundDevice(user.getUserUuid());
+    public List<DeviceDAO> queryBoundDevice(Authentication authentication, UserUuidRequestDTO userUuidRequestDTO){
+        var user = (UserDetailsDTO) authentication.getPrincipal();
+        if(userRoleService.verifyRole(user.getUuid(),UserRoleEnum.queryOthers)) {
+            if (userUuidRequestDTO.getIsQueryOthers() == null) throw new InvalidParamException("没有传入所需的isQueryOthers参数");
+            if (userUuidRequestDTO.getIsQueryOthers()) return deviceService.queryBoundDevice(UuidCreator.fromString(userUuidRequestDTO.getUserUuid()));
+        }
+        return deviceService.queryBoundDevice(user.getUuid());
     }
 
     /**
@@ -75,12 +82,12 @@ public class DeviceCompoService {
      * @param bindDeviceRequestDTO 如果用户的uuid是带有绑定设备权限的管理员，就需要传入要解绑的用户uuid
      */
     public void unbindDevice(Authentication authentication, BindDeviceRequestDTO bindDeviceRequestDTO) {
-        var user = (UserDeviceDAO) authentication.getPrincipal();
+        var user = (UserDetailsDTO) authentication.getPrincipal();
         // 先验证是否有绑定设备权限，有的话就要提供要解绑的用户uuid
-        if(userRoleService.verifyRole(user.getUserUuid(), UserRoleEnum.unbindDevice)){
+        if(userRoleService.verifyRole(user.getUuid(), UserRoleEnum.unbindDevice)){
             deviceService.unbindDevice(UuidCreator.fromString(bindDeviceRequestDTO.getUserUuid()),bindDeviceRequestDTO.getDeviceUuidList());
         }else {
-            deviceService.unbindDevice(user.getUserUuid(),bindDeviceRequestDTO.getDeviceUuidList());
+            deviceService.unbindDevice(user.getUuid(),bindDeviceRequestDTO.getDeviceUuidList());
         }
     }
 }

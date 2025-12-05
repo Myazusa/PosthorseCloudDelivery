@@ -1,13 +1,16 @@
 ﻿package com.github.myazusa.posthorseclouddelivery.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.github.myazusa.posthorseclouddelivery.core.enums.SortOrderEnum;
 import com.github.myazusa.posthorseclouddelivery.core.enums.UserRoleEnum;
+import com.github.myazusa.posthorseclouddelivery.core.enums.UserSortByEnum;
 import com.github.myazusa.posthorseclouddelivery.core.exception.AuthUserException;
+import com.github.myazusa.posthorseclouddelivery.core.exception.InvalidParamException;
 import com.github.myazusa.posthorseclouddelivery.model.dao.RoleDAO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.AlterRoleRequestDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UserDetailsDTO;
-import com.github.myazusa.posthorseclouddelivery.model.dto.UserUuidRequestDTO;
+import com.github.myazusa.posthorseclouddelivery.model.dao.UserDAO;
+import com.github.myazusa.posthorseclouddelivery.model.dto.*;
 import com.github.myazusa.posthorseclouddelivery.service.micro.UserRoleService;
+import com.github.myazusa.posthorseclouddelivery.service.micro.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -17,11 +20,12 @@ import java.util.List;
 @Service
 public class UserCompoService {
     private final UserRoleService userRoleService;
-
+    private final UserService userService;
 
     @Autowired
-    public UserCompoService(UserRoleService userRoleService) {
+    public UserCompoService(UserRoleService userRoleService, UserService userService) {
         this.userRoleService = userRoleService;
+        this.userService = userService;
     }
 
     /**
@@ -61,8 +65,58 @@ public class UserCompoService {
     public List<RoleDAO> queryRoles(Authentication authentication, UserUuidRequestDTO userUuidRequestDTO) {
         var user = (UserDetailsDTO)authentication.getPrincipal();
         if (userRoleService.verifyRole(user.getUuid(),UserRoleEnum.queryOthersRole)) {
-            return userRoleService.queryRoles(UuidCreator.fromString(userUuidRequestDTO.getUserUuid()));
+            if (userUuidRequestDTO.getIsQueryOthers() == null) throw new InvalidParamException("没有传入所需的isQueryOthers参数");
+            if(userUuidRequestDTO.getIsQueryOthers()) {
+                return userRoleService.queryRoles(UuidCreator.fromString(userUuidRequestDTO.getUserUuid()));
+            }
         }
         return userRoleService.queryRoles(user.getUuid());
+    }
+
+    /**
+     * 查询用户方法，管理员用，不是查用户信息而是列出所有用户
+     * @param authentication
+     * @param listUserRequestDTO
+     * @return
+     */
+    public List<UserDAO> queryUsers(Authentication authentication, ListUserRequestDTO listUserRequestDTO){
+        var user = (UserDetailsDTO)authentication.getPrincipal();
+        if (!userRoleService.verifyRole(user.getUuid(),UserRoleEnum.queryOthers)) throw new AuthUserException("该账号无权限查询用户");
+
+        return userService.queryUsers(
+                listUserRequestDTO.getPageNumber(),
+                listUserRequestDTO.getPageSize(),
+                SortOrderEnum.fromString(listUserRequestDTO.getSortOrder()),
+                UserSortByEnum.fromString(listUserRequestDTO.getSortBy()),
+                listUserRequestDTO.getKeyword()
+        );
+    }
+
+    /**
+     * 查询用户信息的方法，管理和用户通用
+     * @param authentication
+     * @param userUuidRequestDTO 如果是管理身份查询则需要这个
+     * @return
+     */
+    public UserInfoResponseDTO queryUserInfo(Authentication authentication, UserUuidRequestDTO userUuidRequestDTO) {
+        var user = (UserDetailsDTO)authentication.getPrincipal();
+
+        UserDAO dao;
+        if (userRoleService.verifyRole(user.getUuid(),UserRoleEnum.queryOthers)) {
+            if (userUuidRequestDTO.getIsQueryOthers() == null) throw new InvalidParamException("没有传入所需的isQueryOthers参数");
+            if (userUuidRequestDTO.getIsQueryOthers()) {
+                dao = userService.queryUserInfo(UuidCreator.fromString(userUuidRequestDTO.getUserUuid()));
+            }else {
+                dao = userService.queryUserInfo(user.getUuid());
+            }
+        }else {
+            dao = userService.queryUserInfo(user.getUuid());
+        }
+
+        return new UserInfoResponseDTO().setUuid(dao.getUuid())
+                .setUsername(dao.getUsername())
+                .setPhone(dao.getPhone())
+                .setCreateTime(dao.getCreateTime())
+                .setEnabled(dao.getEnabled());
     }
 }
